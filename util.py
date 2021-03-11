@@ -1,3 +1,4 @@
+import os
 import base64
 from hashlib import sha256
 
@@ -9,7 +10,7 @@ def sort_dict_v(d):
         "%s%s" % (
             i,
             sort_dict_v(j) if isinstance(j, dict) else j
-        ) for i, j in 
+        ) for i, j in
         sorted(d.items(), key=lambda m:m[0])
     ])
 
@@ -21,10 +22,9 @@ def get_sign(headers, body, secret_key):
 
 
 def get_aes_gcm_data(body, secret_key):
-    secret_key_pre16 = secret_key[:16]
-    key = secret_key_pre16.encode("utf8")
-    cipher = AES.new(key, AES.MODE_GCM)
-    encrypted_data = cipher.encrypt(pad(body.encode("utf8"), AES.block_size))
-    # ciphertext, tag = cipher.encrypt_and_digest(body.encode("utf8"))
-    # ciphertext = ciphertext + tag
-    return base64.b64encode(encrypted_data).decode("utf8")
+    iv = os.urandom(12)
+    key = bytes.fromhex(secret_key)
+    encryptor = AES.new(key=key, mode=AES.MODE_GCM, nonce=iv)
+    ctx = encryptor.encrypt(body.encode('utf-8'))
+    tag = encryptor.digest()
+    return base64.b64encode(iv + ctx + tag).decode("utf8")
