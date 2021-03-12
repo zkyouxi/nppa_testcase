@@ -8,6 +8,7 @@ __FK_CFG = Cfg(
     "1101999999"
 )
 
+
 def get_config(co_name: str) -> Cfg:
     co_name_upper = co_name.upper()
     key = "__%s_CFG" % co_name_upper
