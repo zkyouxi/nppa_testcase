@@ -7,28 +7,26 @@ import requests
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 
-
-the_timestamps = lambda : str("%.3f" % time.time()).replace(".", "")
+the_timestamp = lambda: str("%.3f" % time.time()).replace(".", "")
 
 
 def sort_dict_v(d):
+    """排序"""
     return "".join([
-        "%s%s" % (
-            i,
-            sort_dict_v(j) if isinstance(j, dict) else j
-        ) for i, j in
-        sorted(d.items(), key=lambda m:m[0])
+        "%s%s" % (i, sort_dict_v(j) if isinstance(j, dict) else j)
+        for i, j in sorted(d.items(), key=lambda m: m[0])
     ])
 
 
 def get_sign(headers, body, secret_key):
+    """生成签名"""
     hs = sort_dict_v(headers)
     unhash_str = secret_key + hs + body
     return sha256(unhash_str.encode("utf8")).hexdigest()
 
 
 def get_aes_gcm_data(body, secret_key):
-
+    """生成加密后的数据"""
     iv = get_random_bytes(12)
     key = bytes.fromhex(secret_key)
     encryptor = AES.new(key=key, mode=AES.MODE_GCM, nonce=iv)
@@ -38,12 +36,15 @@ def get_aes_gcm_data(body, secret_key):
 
 
 def make_request(url, data, the_cfg, method="POST"):
+    """http 请求处理"""
     headers = {
         "appId": the_cfg.app_id,
         "bizId": the_cfg.biz_id,
-        "timestamps": the_timestamps(),
+        "timestamps": the_timestamp(),
     }
-    post_data = {"data": get_aes_gcm_data(json.dumps(data), the_cfg.secret_key)}
+    post_data = {
+        "data": get_aes_gcm_data(json.dumps(data), the_cfg.secret_key)
+    }
 
     sign_headers = headers.copy()
     sign_body = json.dumps(post_data)
@@ -51,7 +52,8 @@ def make_request(url, data, the_cfg, method="POST"):
         sign_headers.update(data)
         sign_body = ""
 
-    headers.update({"sign": get_sign(sign_headers, sign_body, the_cfg.secret_key)})
+    headers.update(
+        {"sign": get_sign(sign_headers, sign_body, the_cfg.secret_key)})
 
     if method == "GET":
         return requests.get(url, params=data, headers=headers)
