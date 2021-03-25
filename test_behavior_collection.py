@@ -1,72 +1,56 @@
 """游戏用户行为数据上报接口"""
 
-import json
+import click
 import time
 
-import requests
+from util import make_request
 
-from util import get_sign, get_aes_gcm_data
 
 URL = "https://wlc.nppa.gov.cn/test/collection/loginout/%s"
 
 
-def test_case07(the_cfg, test_code):
-    _url = URL % test_code
+def test_case07(the_cfg):
 
-    headers = {
-        "appId": the_cfg.app_id,
-        "bizId": the_cfg.biz_id,
-        "timestamps": str("%.3f" % time.time()).replace(".", ""),
-    }
+    test_code = click.prompt('\t>>> 请输入《testcase07-游戏用户行为数据上报接口》测试码', type=str)
+    url = URL % test_code
+
     data = {
         "collections": [
             {
-                "no": 2,
-                "si": "111",
-                "bt": 0,
-                "ot": 1615543517,
-                "ct": 2,  # 0: 已认证 2: 游客
-                "di": "111",
+                "no": 1,
+                "si": "sessionid_1000101",
+                "bt": 0, # 0 下线 1 上线
+                "ot": int(time.time()),
+                "ct": 2, # 2 游客
+                "di": "youke_10010231",
                 "pi": "1fffbjzos82bs9cnyj1dna7d6d29zg4esnh99u",
             }
         ]
     }
-    body = json.dumps(data)
-    request_data_s = json.dumps({"data": get_aes_gcm_data(body, the_cfg.secret_key)})
-    headers.update({
-        "Content-Type": "application/json; charset=utf-8",
-        "sign": get_sign(headers, request_data_s, the_cfg.secret_key)
-    })
-    res = requests.post(_url, data=request_data_s, headers=headers)
-    print(res.content)
+
+    response = make_request(url, data, the_cfg)
+    result = response.json()
+    assert result["errcode"] == 0
 
 
-def test_case08(the_cfg, test_code):
-    _url = URL % test_code
+def test_case08(the_cfg):
+    test_code = click.prompt('\t>>> 请输入《testcase08-游戏用户行为数据上报接口》测试码', type=str)
+    url = URL % test_code
 
-    headers = {
-        "appId": the_cfg.app_id,
-        "bizId": the_cfg.biz_id,
-        "timestamps": str("%.3f" % time.time()).replace(".", ""),
-    }
     data = {
         "collections": [
             {
-                "no": 2,
-                "si": "111",
-                "bt": 0,
-                "ot": 1615543517,
-                "ct": 0,  # 0: 已认证 2: 游客
-                "di": "111",
+                "no": 1,
+                "si": "sessionid_1000101",
+                "bt": 0, # 0 下线 1 上线
+                "ot": int(time.time()),
+                "ct": 0, # 2 已认证用户
+                "di": "youke_10010231",
                 "pi": "1fffbjzos82bs9cnyj1dna7d6d29zg4esnh99u",
             }
         ]
     }
-    body = json.dumps(data)
-    request_data_s = json.dumps({"data": get_aes_gcm_data(body, the_cfg.secret_key)})
-    headers.update({
-        "Content-Type": "application/json; charset=utf-8",
-        "sign": get_sign(headers, request_data_s, the_cfg.secret_key)
-    })
-    res = requests.post(_url, data=request_data_s, headers=headers)
-    print(res.content)
+
+    response = make_request(url, data, the_cfg)
+    result = response.json()
+    assert result["errcode"] == 0

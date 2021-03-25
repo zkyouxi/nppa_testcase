@@ -1,19 +1,21 @@
-import os
-import sys
-import logging
+from collections import namedtuple
 
+import click
 import pytest
 
-from cfg import get_config
 
-_co_name = os.environ.get("CO_NAME")
-if _co_name is None:
-    logging.error("需要预设环境变量 CO_NAME")
-    sys.exit(0)
+Cfg = namedtuple("Cfg", ["app_id", "secret_key", "biz_id"])
 
-cfg = get_config(_co_name)
+app_id = click.prompt('请输入 app_id', type=str)
+secret_key = click.prompt('请输入 secret_key', type=str)
+biz_id = click.prompt('请输入 biz_id', type=str)
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def the_cfg():
-    yield cfg
+    yield Cfg(
+        app_id,
+        secret_key,
+        biz_id
+    )
+

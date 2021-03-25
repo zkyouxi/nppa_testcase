@@ -1,72 +1,42 @@
 """实名认证结果查询接口"""
 
-import time
+import click
 
-import requests
-
-from util import get_sign
+from util import make_request
 
 URL = "https://wlc.nppa.gov.cn/test/authentication/query/%s"
 
 
-def test_case04(the_cfg, test_code):
-    _url = URL % test_code
+def test_case04(the_cfg):
+    test_code = click.prompt('\t>>> 请输入《testcase04-实名认证结果查询接口》测试码', type=str)
+    url = URL % test_code
 
-    headers = {
-        "appId": the_cfg.app_id,
-        "bizId": the_cfg.biz_id,
-        "timestamps": str("%.3f" % time.time()).replace(".", ""),
-    }
     data = {
         "ai": "100000000000000001"
     }
-    headers.update(data)
-    headers.update({
-        "Content-Type": "application/json; charset=utf-8",
-        "sign": get_sign(headers, '', the_cfg.secret_key)
-    })
-    headers.pop('ai')
-    res = requests.get(_url, params=data, headers=headers)
-    print(res.content)
+
+    response = make_request(url, data, the_cfg, method="GET")
+    result = response.json()
+    assert result["errcode"] == 0 and result["data"]["result"]["status"] == 0
 
 
-def test_case05(the_cfg, test_code):
-    _url = URL % test_code
+def test_case05(the_cfg):
+    test_code = click.prompt('\t>>> 请输入《testcase05-实名认证结果查询接口》测试码', type=str)
+    url = URL % test_code
 
-    headers = {
-        "appId": the_cfg.app_id,
-        "bizId": the_cfg.biz_id,
-        "timestamps": str("%.3f" % time.time()).replace(".", ""),
-    }
-    data = {
-        "ai": "200000000000000001"
-    }
-    headers.update(data)
-    headers.update({
-        "Content-Type": "application/json; charset=utf-8",
-        "sign": get_sign(headers, '', the_cfg.secret_key)
-    })
-    headers.pop('ai')
-    res = requests.get(_url, params=data, headers=headers)
-    print(res.content)
+    data = {"ai":"200000000000000001"}
+
+    response = make_request(url, data, the_cfg, method="GET")
+    result = response.json()
+    assert result["errcode"] == 0 and result["data"]["result"]["status"] == 1
 
 
-def test_case06(the_cfg, test_code):
-    _url = URL % test_code
+def test_case06(the_cfg):
+    test_code = click.prompt('\t>>> 请输入《testcase06-实名认证结果查询接口》测试码', type=str)
+    url = URL % test_code
 
-    headers = {
-        "appId": the_cfg.app_id,
-        "bizId": the_cfg.biz_id,
-        "timestamps": str("%.3f" % time.time()).replace(".", ""),
-    }
-    data = {
-        "ai": "300000000000000001"
-    }
-    headers.update(data)
-    headers.update({
-        "Content-Type": "application/json; charset=utf-8",
-        "sign": get_sign(headers, '', the_cfg.secret_key)
-    })
-    headers.pop('ai')
-    res = requests.get(_url, params=data, headers=headers)
-    print(res.content)
+    data = {"ai":"300000000000000001"}
+
+    response = make_request(url, data, the_cfg, method="GET")
+    result = response.json()
+    assert result["errcode"] == 0 and result["data"]["result"]["status"] == 2
